@@ -1,0 +1,16 @@
+Packet size (in bytes) distribution:
+	Uniform(a=32, b=6914)Support: [32, 6914](to be rounded to the nearest integer)
+Inter arrival time distribution:
+	Gamma(shape=1.314, scale=?)
+Node buffer size: 50
+Node postitions:
+Node0(0.359, 0.799);
+Node1(0.261, 0.485);
+Node2(0.642, 0.499);
+Node3(0.451, 0.666);
+Node4(0.626, 0.469);
+Node5(0.473, 0.541);
+Node6(0.872, 0.529);
+Node7(0.887, 0.412);
+Node8(0.788, 0.502);
+Node9(0.362, 0.702);

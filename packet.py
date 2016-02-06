@@ -1,40 +1,44 @@
-#         #
+###########
 # IMPORTS #
-#         #
+###########
 
-import random
+import random as distributions
 
-import numpy.random as distribution
+# import numpy.random as distributions
 
 import settings
-import output
+import log
 
-#       #
+#########
 # CLASS #
-#       #
+#########
 
 class Packet:
     count = 0
 
-    def __init__(self, sender, arrival_time):
+    def __init__(self, sender, time):
         self.id = Packet.count
         self.sender = sender
-        self.arrival_time = arrival_time
-        #self.size = int(distribution.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
-        self.size = int(random.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
+        self.time = time
+        # self.size = int(distributions.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
+        self.size = int(distributions.uniform(32, 1691+1))
         self.transfer_time = self.size/settings.SPEED
-        self.queued = False
+        self.is_queued = False
+        self.is_lost = False
+
         Packet.count += 1
 
     def __lt__(self, other):
-        return self.arrival_time < other.arrival_time
-
+        if self.time != other.time:
+            return self.time < other.time
+        else:
+            return self.id < other.id                                                               # if the time is the same, discriminate
+                                                                                                    # using the incremental nature of the id
     def __str__(self):
-        lines = ["",
-                 output.title("- PACKET {} -".format(self.id), "cyan"),
-                 "sender        = {}".format(self.sender),
-                 "arrival time  = {} s (abs)".format(self.arrival_time),
-                 "size          = {} byte".format(self.size),
-                 "transfer time = {} s (rel)".format(self.transfer_time),
-                 "status        = {}".format("QUEUED" if self.queued else "PENDING")]
-        return "\n".join(lines)
+        return "\n".join(["",
+                          log.title("- PACKET {} -".format(self.id), "cyan"),
+                          "sender        = {}".format(self.sender),
+                          " ".join(["schedule time =", settings.PRECISION, "s(abs)"]).format(self.time),
+                          " ".join(["transfer time =", settings.PRECISION, "s(rel)"]).format(self.transfer_time),
+                          "size          = {} byte".format(self.size),
+                          "status        = {}".format("QUEUED" if self.is_queued else "PENDING")])

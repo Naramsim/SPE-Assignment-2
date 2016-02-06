@@ -1,21 +1,21 @@
-#         #
+###########
 # IMPORTS #
-#         #
+###########
 
 import math
-import random
+import random as distributions
 from heapq import heappush as heap_push
 
-import numpy.random as distribution
+# import numpy.random as distributions
 
 import settings
-import output
+import log
 from scheduler import Scheduler
 from packet import Packet
 
-#       #
+#########
 # CLASS #
-#       #
+#########
 
 class Node:
     count = 0
@@ -28,59 +28,90 @@ class Node:
         self.queue = []
         self.sending_until = 0
         self.receiving_until = 0
+        self.packets_lost = 0
         self.packets_sent = 0
         self.packets_received = 0
         self.packets_collided = 0
+        self.has_collided = False
 
         Node.count += 1
 
     def find_neigbhours(self, nodes):
         for node in nodes:
             distance = math.hypot(self.x-node.x, self.y-node.y)
-            if distance <= settings.BOUNDS and distance != 0:
+            if distance <= settings.BOUNDS and self.id != node.id:
                 self.neighbours.append(node)
 
     def generate_next_packet(self):
-        #time_arrival = distribution.gamma(settings.GAMMA_SHAPE, settings.GAMMA_SCALE)
-        time_arrival = random.uniform(0, 3)
-        packet = Packet(self.id, Scheduler.time+time_arrival)
-        self.queue.append(packet)
-        heap_push(Scheduler.events, packet)
+        # time_delta = distributions.gamma(settings.GAMMA_SHAPE, settings.GAMMA_SCALE)
+        time_delta = distributions.expovariate(100)
+        packet = Packet(self.id, Scheduler.time+time_delta)
 
-    def prepare_packet(self, packet):
-        if self.is_idle():
-            self.send_packet(packet)
+        if len(self.queue)-1 < settings.BUFFER:                                                     # since the queue adds each packet as it
+            print(log.success(" ".join([str(self.id), "generated packet", str(packet.id)])))        # is *decided* when it is generated and
+            self.queue.append(packet)                                                               # not as it *is* generated, one element
+            heap_push(Scheduler.events, packet)                                                     # the queue is not counted
         else:
+            print(log.error(" ".join([str(self.id), "lost packet", str(packet.id), "(queue full)"])))
+            packet.is_lost = True
+            heap_push(Scheduler.events, packet)                                                     # the packet is pushed into the event
+                                                                                                    # queue because it still has to generate
+    def handle_packet(self, packet):                                                                # a new packet, from the point in time
+        if self.is_idle():                                                                          # where it *would* have been handled
+            print(log.success(" ".join([str(self.id), "sent packet", str(packet.id)])))
+            self.send_packet(packet)
+        elif self.is_sending() and packet.time == Scheduler.time_previous:                          # the node had multiple packets scheduled
+            print(log.success(" ".join([str(self.id), "queued packet", str(packet.id)])))           # at the same time, so if it is already
+            self.queue_packet(packet)                                                               # sending it queues the next one(s);
+        elif self.is_receiving() and packet.time == Scheduler.time_previous:                        # two (or more) queued packets are sent
+            print(log.warning(" ".join([str(self.id), "sent packet", str(packet.id), "(expect a collision)"])))  # at the same time by two neighbouring
+            self.send_packet(packet)                                                                # nodes
+        else:
+            print(log.success(" ".join([str(self.id), "queued packet", str(packet.id)])))
             self.queue_packet(packet)
 
     def send_packet(self, packet):
+        self.queue.pop(0)
         self.sending_until = Scheduler.time+packet.transfer_time
+
         for neighbour in self.neighbours:
             self.packets_sent += 1
 
             if neighbour.is_idle():
+                neighbour.has_collided = False
                 neighbour.packets_received += 1
             elif neighbour.is_receiving():
-                neighbour.packets_received -= 1
-                neighbour.packets_collided += 1
-            elif neighbour.is_sending():
-                output.error("Two neighbours both sending.")
-                neighbour.packets_received -= 1
-                neighbour.packets_collided += 2    # lose both the packet being received and the one it's sending
+                print(log.error(" ".join([str(neighbour.id), "was receiving"])))
+                if not neighbour.has_collided:                                                      # when the first collision is detected
+                    neighbour.packets_received -= 1                                                 # on a neigbhour, that neigbour loses
+                    neighbour.packets_collided += 2                                                 # both the packet it was receiving, and
+                    neighbour.has_collided = True                                                   # the packet that has just been sent;
+                else:                                                                               # if a collision was already detected,
+                    neighbour.packets_collided += 1                                                 # the neighbour only loses the just sent
+            elif neighbour.is_sending():                                                            # packet (the others were already lost)
+                print(log.error(" ".join([str(self.id), "and", str(neighbour.id), "both sending"])))
+                if not neighbour.has_collided:
+                    neighbour.packets_received -= 1
+                    neighbour.packets_collided += 2
+                    neighbour.has_collided = True
+                else:
+                    neighbour.packets_collided += 1
 
-            if self.sending_until > neighbour.receiving_until:    # if receiving time is more that the previous one
-                neighbour.receiving_until = self.sending_until
+            if self.sending_until > neighbour.receiving_until:                                      # the just sent packet keeps the receiver
+                neighbour.receiving_until = self.sending_until                                      # busy for more than the previous packet
 
     def queue_packet(self, packet):
-        packet.queued = True
-        packet.time = self.sending_until
-        self.queue.append(packet)
+        packet.is_queued = True
+        packet.time = max(self.sending_until, self.receiving_until)                                 # the packet is scheduled for resending
+        heap_push(Scheduler.events, packet)                                                         # as soon as the node is free;
+        if not packet.is_queued:                                                                       # only enques the packet if it had just
+            self.queue.append(packet)                                                               # been generated, avoiding reenqueueing
 
     def is_sending(self):
-        return self.sending_until-Scheduler.time > 0
+        return self.sending_until > Scheduler.time
 
     def is_receiving(self):
-        return self.receiving_until-Scheduler.time > 0
+        return self.receiving_until > Scheduler.time
 
     def is_idle(self):
         return not self.is_sending() and not self.is_receiving()
@@ -89,18 +120,20 @@ class Node:
         packets = []
         for packet in self.queue:
             packets.append(packet.id)
+
         destinations = []
         for neighbour in self.neighbours:
             destinations.append(neighbour.id)
-        lines = ["",
-                 output.title("- NODE {} -".format(self.id), "magenta"),
-                 "x          = {}".format(self.x),
-                 "y          = {}".format(self.y),
-                 "neighbours = {}".format(destinations),
-                 "queue      = {}".format(packets),
-                 "sending    = {} s (abs)".format(self.sending_until),
-                 "receiving  = {} s (abs)".format(self.receiving_until),
-                 "sent       = {}".format(self.packets_sent),
-                 "received   = {}".format(self.packets_received),
-                 "collisions = {}".format(self.packets_collided)]
-        return "\n".join(lines)
+
+        return "\n".join(["",
+                          log.title("- NODE {} -".format(self.id), "magenta"),
+                          "x          = {}".format(self.x),
+                          "y          = {}".format(self.y),
+                          "neighbours = {}".format(destinations),
+                          "queue      = {}".format(packets),
+                          " ".join(["sending    =", settings.PRECISION, "s(abs)"]).format(self.sending_until),
+                          " ".join(["receiving  =", settings.PRECISION, "s(abs)"]).format(self.receiving_until),
+                          "lost       = {}".format(self.packets_lost),
+                          "sent       = {}".format(self.packets_sent),
+                          "received   = {}".format(self.packets_received),
+                          "collided   = {}".format(self.packets_collided)])

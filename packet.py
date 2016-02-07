@@ -35,10 +35,11 @@ class Packet:
             return self.id < other.id                                                               # if the time is the same, discriminate
                                                                                                     # using the incremental nature of the id
     def __str__(self):
-        return "\n".join(["",
-                          log.title("- PACKET {} -".format(self.id), "cyan"),
-                          "sender        = {}".format(self.sender),
-                          " ".join(["schedule time =", settings.PRECISION, "s(abs)"]).format(self.time),
-                          " ".join(["transfer time =", settings.PRECISION, "s(rel)"]).format(self.transfer_time),
-                          "size          = {} byte".format(self.size),
-                          "status        = {}".format("QUEUED" if self.is_queued else "PENDING")])
+        lines = ["",
+                 log.color("- PACKET {} -".format(self.id), "cyan"),
+                 "sender        = {}".format(self.sender),
+                 " ".join(["schedule time =", settings.PRECISION, "s(abs)"]).format(self.time),
+                 " ".join(["transfer time =", settings.PRECISION, "s(rel)"]).format(self.transfer_time),
+                 "size          = {} byte".format(self.size),
+                 "status        = {}".format("QUEUED" if self.is_queued else "PENDING")]
+        return "\n".join(lines)

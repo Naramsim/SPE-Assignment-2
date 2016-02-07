@@ -6,6 +6,7 @@ import random as distributions
 
 # import numpy.random as distributions
 
+import arguments
 import settings
 import log
 from scheduler import Scheduler
@@ -20,6 +21,8 @@ nodes = []
 ########
 # MAIN #
 ########
+
+arguments.save(arguments.parse())
 
 # init
 #
@@ -36,7 +39,9 @@ for node in nodes:
 # simulation
 #
 
-for i in range(0, settings.STEPS+1):
-    print(log.before_step(Scheduler))
-    Scheduler.step()
-    print(log.after_step(Scheduler))
+if settings.TIME:
+    while Scheduler.time < settings.TIME:
+        Scheduler.step()
+elif settings.STEPS:
+    for i in range(0, settings.STEPS+1):
+        Scheduler.step()

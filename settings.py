@@ -1,11 +1,11 @@
 # distributions
 #
 
-SEED = 10
+SEED = None
 UNIFORM_MIN = 32
 UNIFORM_MAX = 6914
 GAMMA_SHAPE = 1.314
-GAMMA_SCALE = 1
+GAMMA_SCALE = None
 
 # nodes
 #
@@ -32,11 +32,14 @@ POINTS = [(0.943, 0.705),
           (0.856, 0.646)]
 BOUNDS = 0.25
 # BUFFER = 50
-BUFFER = 1
+BUFFER = 30
 SPEED = 1*1024*1024
 
 # simulation
 #
 
-STEPS = 10
+VERBOSE = None
+QUIET = None
+TIME = None
+STEPS = None
 PRECISION = "{:.8f}"

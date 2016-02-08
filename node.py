@@ -84,6 +84,7 @@ class Node:
             # logging
             log.error(" ".join([str(self.id), "lost packet", str(packet.id), "(queue full)"]))
             # logging
+            self.packets_lost += 1
             packet.is_lost = True
             heap_push(Scheduler.events, packet)                                                     # the packet is pushed into the event
                                                                                                     # queue because it still has to generate

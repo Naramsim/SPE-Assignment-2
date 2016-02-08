@@ -53,7 +53,7 @@ class Scheduler:
             file_results = open(settings.FILE, "a")
 
         results_title = log.format_color("results", "green")
-        results_data = [["NODE", "THROUGHPUT", "COLLISION RATE", "LOSS RATE"]]
+        results_data = [["NODE", "THROUGHPUT (kB/s)", "COLLISION RATE (%)", "LOSS RATE (%)"]]
 
         loss_rate_total = 0
         collision_rate_total = 0
@@ -69,12 +69,12 @@ class Scheduler:
                 collision_rate = 0
             collision_rate_total += collision_rate
 
-            line = [str(node.id), str(throughput), str(collision_rate), str(loss_rate)]
+            line = [str(node.id), settings.PRECISION.format(throughput), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]
             results_data.append(line)
             if settings.FILE:
                 file_results.write("".join([" ".join(line), "\n"]))
 
-        line = ["MEAN", str(throughput_total/len(net.nodes)), str(collision_rate_total/len(net.nodes)), str(loss_rate_total/len(net.nodes))]
+        line = ["MEAN", settings.PRECISION.format(throughput_total/len(net.nodes)), settings.PRECISION.format(collision_rate_total/len(net.nodes)*100), settings.PRECISION.format(loss_rate_total/len(net.nodes)*100)]
         results_data.append(line)
         if settings.FILE:
             file_results.write("".join([" ".join(line), "\n"]))

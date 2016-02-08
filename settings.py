@@ -43,4 +43,4 @@ QUIET = None
 FILE = None
 TIME = None
 STEPS = None
-PRECISION = "{:.8f}"
+PRECISION = "{:.8g}"

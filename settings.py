@@ -40,6 +40,7 @@ SPEED = 1*1024*1024
 
 VERBOSE = None
 QUIET = None
+FILE = None
 TIME = None
 STEPS = None
 PRECISION = "{:.8f}"

@@ -29,11 +29,8 @@ class Scheduler:
 
     def step():
         # logging
-        if settings.VERBOSE:
-            lines = ["",
-                     "",
-                     log.success("stepping")]
-            print("\n".join(lines))
+        log.plain("\n")
+        log.success("stepping")
         # logging
 
         packet = heap_pop(Scheduler.events)
@@ -48,18 +45,55 @@ class Scheduler:
             current_node.handle_packet(packet)                                                      # was full, take no action
 
         # logging
-        if settings.VERBOSE:
-            print(Scheduler())
+        log.plain(Scheduler())
         # logging
 
+    def handle_results():
+        if settings.FILE:
+            file_results = open(settings.FILE, "a")
+
+        results_title = log.format_color("results", "green")
+        results_data = [["NODE", "THROUGHPUT", "COLLISION RATE", "LOSS RATE"]]
+
+        loss_rate_total = 0
+        collision_rate_total = 0
+        throughput_total = 0
+        for node in net.nodes:
+            throughput = node.data_sent/Scheduler.time
+            throughput_total += throughput
+            loss_rate = node.packets_lost/node.packets_generated
+            loss_rate_total += loss_rate
+            try:
+                collision_rate = node.packets_collided/(node.packets_received+node.packets_collided)
+            except ZeroDivisionError:
+                collision_rate = 0
+            collision_rate_total += collision_rate
+
+            line = [str(node.id), str(throughput), str(collision_rate), str(loss_rate)]
+            results_data.append(line)
+            if settings.FILE:
+                file_results.write("".join([" ".join(line), "\n"]))
+
+        line = ["MEAN", str(throughput_total/len(net.nodes)), str(collision_rate_total/len(net.nodes)), str(loss_rate_total/len(net.nodes))]
+        results_data.append(line)
+        if settings.FILE:
+            file_results.write("".join([" ".join(line), "\n"]))
+
+        if not settings.QUIET:
+            print("\n")
+            print(AsciiTable(results_data, results_title).table)
+
+        if settings.FILE:
+            file_results.close()
+
     def _get_heap_table():
-        heap_title = log.color("events", "green")
+        heap_title = log.format_color("events", "green")
         heap_data = [["TIME", "NODE", "PACKET"]]
 
         ordered_events = heap_read(len(Scheduler.events), Scheduler.events)
         for packet in ordered_events:
             if packet.time == Scheduler.time:
-                time = log.evidence(settings.PRECISION.format(packet.time), "yellow")
+                time = log.format_evidence(settings.PRECISION.format(packet.time), "yellow")
             else:
                 time = settings.PRECISION.format(packet.time)
 
@@ -68,20 +102,20 @@ class Scheduler:
         return AsciiTable(heap_data, heap_title).table
 
     def _get_status_table():
-        status_title = log.color(" ".join(["time =", settings.PRECISION, "s(abs)"]).format(Scheduler.time), "green")
+        status_title = log.format_color(" ".join(["time =", settings.PRECISION, "s(abs)"]).format(Scheduler.time), "green")
         status_data = [["NODE", "STATUS", "QUEUE", "TO", "FOR s(rel)", "UNTIL s(abs)", "LOST", "SENT", "RECEIVED", "COLLIDED"]]
 
         for node in net.nodes:
             if node.is_idle():
-                status = log.evidence("IDLE", "green")
+                status = log.format_evidence("IDLE", "green")
                 time_relative = "-"
                 time_absolute = "-"
             elif node.is_sending():
-                status = log.evidence("SENDING", "cyan")
+                status = log.format_evidence("SENDING", "cyan")
                 time_relative = settings.PRECISION.format(node.sending_until-Scheduler.time)
                 time_absolute = settings.PRECISION.format(node.sending_until)
             elif node.is_receiving():
-                status = log.evidence("RECEIVING", "magenta")
+                status = log.format_evidence("RECEIVING", "magenta")
                 time_relative = settings.PRECISION.format(node.receiving_until-Scheduler.time)
                 time_absolute = settings.PRECISION.format(node.receiving_until)
 

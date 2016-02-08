@@ -8,7 +8,6 @@ import random as distributions
 
 import arguments
 import settings
-import log
 from scheduler import Scheduler
 from node import Node
 
@@ -45,3 +44,5 @@ if settings.TIME:
 elif settings.STEPS:
     for i in range(0, settings.STEPS+1):
         Scheduler.step()
+
+Scheduler.handle_results()

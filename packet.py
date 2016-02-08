@@ -36,7 +36,7 @@ class Packet:
                                                                                                     # using the incremental nature of the id
     def __str__(self):
         lines = ["",
-                 log.color("- PACKET {} -".format(self.id), "cyan"),
+                 log.format_color("- PACKET {} -".format(self.id), "cyan"),
                  "sender        = {}".format(self.sender),
                  " ".join(["schedule time =", settings.PRECISION, "s(abs)"]).format(self.time),
                  " ".join(["transfer time =", settings.PRECISION, "s(rel)"]).format(self.transfer_time),

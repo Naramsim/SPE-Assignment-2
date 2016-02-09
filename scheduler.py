@@ -9,7 +9,7 @@ from terminaltables import AsciiTable
 
 import settings
 import log
-import __main__ as net
+from net import nodes
 
 #########
 # CLASS #
@@ -38,7 +38,7 @@ class Scheduler:
         Scheduler.time_previous = Scheduler.time
         Scheduler.time = packet.time
 
-        current_node = net.nodes[packet.sender]                                                     # this works because the way the list is
+        current_node = nodes[packet.sender]                                                     # this works because the way the list is
         if not packet.is_queued:                                                                    # built introduces a 1:1 relation between
             current_node.generate_next_packet()                                                     # the id and the index;
         if not packet.is_lost:                                                                      # if the packet was lost (i.e. the queue
@@ -58,7 +58,7 @@ class Scheduler:
         loss_rate_total = 0
         collision_rate_total = 0
         throughput_total = 0
-        for node in net.nodes:
+        for node in nodes:
             throughput = node.data_sent/Scheduler.time
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
@@ -74,7 +74,7 @@ class Scheduler:
             if settings.FILE:
                 file_results.write("".join([" ".join(line), "\n"]))
 
-        line = ["MEAN", settings.PRECISION.format(throughput_total/len(net.nodes)), settings.PRECISION.format(collision_rate_total/len(net.nodes)*100), settings.PRECISION.format(loss_rate_total/len(net.nodes)*100)]
+        line = ["MEAN", settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]
         results_data.append(line)
         if settings.FILE:
             file_results.write("".join([" ".join(line), "\n"]))
@@ -105,7 +105,7 @@ class Scheduler:
         status_title = log.format_color(" ".join(["time =", settings.PRECISION, "s(abs)"]).format(Scheduler.time), "green")
         status_data = [["NODE", "STATUS", "QUEUE", "TO", "FOR s(rel)", "UNTIL s(abs)", "LOST", "SENT", "RECEIVED", "COLLIDED"]]
 
-        for node in net.nodes:
+        for node in nodes:
             if node.is_idle():
                 status = log.format_evidence("IDLE", "green")
                 time_relative = "-"

@@ -8,14 +8,9 @@ import random as distributions
 
 import arguments
 import settings
+from net import nodes
 from scheduler import Scheduler
 from node import Node
-
-#######
-# NET #
-#######
-
-nodes = []
 
 ########
 # MAIN #

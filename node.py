@@ -3,10 +3,9 @@
 ###########
 
 import math
-import random as distributions
 from heapq import heappush as heap_push
 
-# import numpy.random as distributions
+import numpy.random as distributions
 
 import settings
 import log
@@ -69,8 +68,7 @@ class Node:
                 self.neighbours.append(node)
 
     def generate_next_packet(self):
-        # time_delta = distributions.gamma(settings.GAMMA_SHAPE, settings.GAMMA_SCALE)
-        time_delta = distributions.expovariate(100)
+        time_delta = distributions.gamma(settings.GAMMA_SHAPE, settings.GAMMA_SCALE)
         packet = Packet(self.id, Scheduler.time+time_delta)
         self.packets_generated += 1
 
@@ -146,7 +144,8 @@ class Node:
                 # logging
                 if not neighbour.has_collided:
                     neighbour.packets_received -= 1
-                    neighbour.packets_collided += 2
+                    neighbour.packets_collided += 1
+                    self.packets_collided += 1
                     neighbour.has_collided = True
                 else:
                     neighbour.packets_collided += 1

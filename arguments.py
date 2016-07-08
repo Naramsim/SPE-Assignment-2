@@ -20,7 +20,7 @@ def parse():
     group_limits = parser.add_mutually_exclusive_group(required=True)
     group_limits.add_argument("-t", "--time", type=_positive_float, help="run the simulation until time T", metavar="T")
     group_limits.add_argument("-s", "--steps", type=_positive_int, help="run the simulation for S amount of steps", metavar="S")
-    parser.add_argument("scale", type=_positive_int, help="the scale of the gamma distribution controlling the inter-arrival time")
+    parser.add_argument("scale", type=_positive_float, help="the scale of the gamma distribution controlling the inter-arrival time")
     return parser.parse_args()
 
 def save(args):

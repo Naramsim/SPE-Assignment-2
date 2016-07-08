@@ -2,9 +2,7 @@
 # IMPORTS #
 ###########
 
-import random as distributions
-
-# import numpy.random as distributions
+import numpy.random as distributions
 
 import settings
 import log
@@ -20,8 +18,7 @@ class Packet:
         self.id = Packet.count
         self.sender = sender
         self.time = time
-        # self.size = int(distributions.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
-        self.size = int(distributions.uniform(32, 1691+1))
+        self.size = int(distributions.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
         self.transfer_time = self.size/settings.SPEED
         self.is_queued = False
         self.is_lost = False

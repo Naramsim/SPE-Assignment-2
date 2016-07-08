@@ -2,9 +2,7 @@
 # IMPORTS #
 ###########
 
-import random as distributions
-
-# import numpy.random as distributions
+import numpy.random as distributions
 
 import arguments
 import settings

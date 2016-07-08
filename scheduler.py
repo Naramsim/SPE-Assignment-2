@@ -38,11 +38,11 @@ class Scheduler:
         Scheduler.time_previous = Scheduler.time
         Scheduler.time = packet.time
 
-        current_node = nodes[packet.sender]                                                     # this works because the way the list is
+        current_node = nodes[packet.sender]                                                         # this works because the way the list is
         if not packet.is_queued:                                                                    # built introduces a 1:1 relation between
             current_node.generate_next_packet()                                                     # the id and the index;
         if not packet.is_lost:                                                                      # if the packet was lost (i.e. the queue
-            current_node.handle_packet(packet)                                                      # was full, take no action
+            current_node.handle_packet(packet)                                                      # was full), take no action
 
         # logging
         log.plain(Scheduler())
@@ -58,8 +58,9 @@ class Scheduler:
         loss_rate_total = 0
         collision_rate_total = 0
         throughput_total = 0
+        avarage_load = ((settings.UNIFORM_MAX-settings.UNIFORM_MIN)/2) / (settings.GAMMA_SHAPE*settings.GAMMA_SCALE)  # mean of the size of each single packet divided by the mean of the inter arrival time
         for node in nodes:
-            throughput = node.data_sent/Scheduler.time
+            throughput = node.data_sent/Scheduler.time/1000
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
             loss_rate_total += loss_rate
@@ -78,10 +79,15 @@ class Scheduler:
         results_data.append(line)
         if settings.FILE:
             file_results.write("".join([" ".join(line), "\n"]))
+            file_results.write("".join(["TOTAL_THROUGHPUT ", settings.PRECISION.format(throughput_total), "\n"]))
+            file_results.write("".join(["AVARAGE_OFFERED_LOAD ", settings.PRECISION.format(avarage_load), "\n"]))
+            file_results.write("".join(["SCALE ", settings.PRECISION.format(settings.GAMMA_SCALE), "\n"]))
 
         if not settings.QUIET:
             print("\n")
             print(AsciiTable(results_data, results_title).table)
+            print("\n")
+            print(" ".join(["SYSTEM THROUGHPUT =", settings.PRECISION.format(throughput_total)]))
 
         if settings.FILE:
             file_results.close()

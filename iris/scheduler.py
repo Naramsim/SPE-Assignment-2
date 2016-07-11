@@ -49,8 +49,9 @@ class Scheduler:
         # logging
 
     def handle_results():
-        if settings.FILE:
-            file_results = open(settings.FILE, "a")
+        if settings.FOLDER:
+            file_total = open(settings.FOLDER+"\\total.csv", "a")
+            file_nodes = open(settings.FOLDER+"\\nodes.csv", "a")
 
         results_title = log.format_color("results", "green")
         results_data = [["NODE", "THROUGHPUT (kB/s)", "COLLISION RATE (%)", "LOSS RATE (%)"]]
@@ -72,16 +73,17 @@ class Scheduler:
 
             line = [str(node.id), settings.PRECISION.format(throughput), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]
             results_data.append(line)
-            if settings.FILE:
-                file_results.write("".join([" ".join(line), "\n"]))
+            if settings.FOLDER:
+                file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
+                file_nodes.write("\n")
 
         line = ["MEAN", settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]
         results_data.append(line)
-        if settings.FILE:
-            file_results.write("".join([" ".join(line), "\n"]))
-            file_results.write("".join(["TOTAL_THROUGHPUT ", settings.PRECISION.format(throughput_total), "\n"]))
-            file_results.write("".join(["AVARAGE_OFFERED_LOAD ", settings.PRECISION.format(avarage_load), "\n"]))
-            file_results.write("".join(["SCALE ", settings.PRECISION.format(settings.GAMMA_SCALE), "\n"]))
+        if settings.FOLDER:
+            file_nodes.write(",".join(["-1", settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
+            file_nodes.write("\n")
+            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total), settings.PRECISION.format(avarage_load)]))
+            file_total.write("\n")
 
         if not settings.QUIET:
             print("\n")
@@ -89,8 +91,9 @@ class Scheduler:
             print("\n")
             print(" ".join(["SYSTEM THROUGHPUT =", settings.PRECISION.format(throughput_total)]))
 
-        if settings.FILE:
-            file_results.close()
+        if settings.FOLDER:
+            file_nodes.close()
+            file_total.close()
 
     def _get_heap_table():
         heap_title = log.format_color("events", "green")

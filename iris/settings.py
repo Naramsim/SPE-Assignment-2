@@ -29,7 +29,7 @@ SPEED = 1*1000*1000
 
 VERBOSE = None
 QUIET = None
-FILE = None
+FOLDER = None
 TIME = None
 STEPS = None
 PRECISION = "{:.8g}"

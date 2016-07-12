@@ -82,7 +82,7 @@ class Scheduler:
         if settings.FOLDER:
             file_nodes.write(",".join(["-1", settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
             file_nodes.write("\n")
-            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total), settings.PRECISION.format(avarage_load)]))
+            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
             file_total.write("\n")
 
         if not settings.QUIET:

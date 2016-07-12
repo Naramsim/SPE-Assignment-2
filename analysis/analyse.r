@@ -22,46 +22,49 @@ plot.new <- function()
 plot.throughput <- function(xData, yData)
     {
     title = "system"
-    xLab = "offered throughput (kB/s)"
-    yLab = "actual throughput (kB/s)"
+    xLab = "offered throughput (%)"
+    yLab = "actual throughput (%)"
 
     plot.new()
-    plot(xData, yData, type="l", main=title, xlab=xLab, ylab=yLab)
+    plot(xData/speed, yData/speed, type="l", main=title, xlab=xLab, ylab=yLab)
     }
 
 plot.packets <- function(xData, yData1, yData2)
     {
     title = "system"
-    xLab = "offered throughput (kB/s)"
+    xLab = "offered throughput (%)"
     yLab = "packets (%)"
     colors = c("blue", "red")
     legend = c("collided", "lost")
 
     plot.new()
-    plot(xData, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
-    lines(xData, yData2, type="l", col=colors[2])
+    plot(xData/speed, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
+    lines(xData/speed, yData2, type="l", col=colors[2])
     legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
 plot.node <- function(xData, yData1, yData2, node)
     {
     title = ifelse(node != -1, paste0("node ", node), "nodes means")
-    xLab = "throughput (kB/s)"
+    xLab = "throughput (%)"
     yLab = "packets (%)"
     colors = c("blue", "red")
     legend = c("collided", "lost")
 
     plot.new()
-    plot(xData, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
-    lines(xData, yData2, type="l", col=colors[2])
+    plot(xData/speed, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
+    lines(xData/speed, yData2, type="l", col=colors[2])
     legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
 boxplot.throughput <- function(data)
     {
     title = "system"
-    xLab = "offered throughput (kB/s)"
-    yLab = "actual throughput (kB/s)"
+    xLab = "offered throughput (%)"
+    yLab = "actual throughput (%)"
+
+    data$throughput = data$throughput/speed
+    data$load = data$load/speed
 
     plot.new()
     boxplot(throughput ~ load, data=data, main=title, xlab=xLab, ylab=yLab)
@@ -71,11 +74,17 @@ boxplot.node <- function(data, node)
     {
     title = ifelse(node != -1, paste0("node ", node), "nodes means")
     xLab = "scale"
-    yLab = "packets (%)"
+    yLab = "packets collided (%)"
 
     plot.new()
     boxplot(collision ~ scale, data=data, main=title, xlab=xLab, ylab=yLab)
     }
+
+#----------#
+# SETTINGS #
+#----------#
+
+speed = 1000000
 
 #------#
 # DATA #

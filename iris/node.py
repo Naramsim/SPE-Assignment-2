@@ -119,7 +119,6 @@ class Node:
 
     def _send_packet(self, packet):
         self.queue.pop(0)
-        self.data_sent += packet.size
         self.sending_until = Scheduler.time+packet.transfer_time
 
         for neighbour in self.neighbours:
@@ -128,6 +127,7 @@ class Node:
             if neighbour.is_idle():
                 neighbour.has_collided = False
                 neighbour.packets_received += 1
+                self.data_sent += packet.size/len(self.neighbours)
             elif neighbour.is_receiving():
                 # logging
                 log.error(" ".join([str(neighbour.id), "was receiving"]))

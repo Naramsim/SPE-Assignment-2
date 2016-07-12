@@ -1,73 +1,81 @@
 # execute with source(chdir=TRUE) for automatic relative paths, if not uncomment the below function and manually enter
-# the path where both this script and the .csv files are
+# the path where both this script and the .csv files are.
 setwd("C:\\Users\\affa\\OneDrive\\Documents\\Coding\\Uni\\Performance\\Assignment\ II\\analysis")
 
 #---------#
 # HELPERS #
 #---------#
 
-# operations
-as.numeric.factor <- function(x)
-    {
-    as.numeric(levels(x))[x]
-    }
-
-element.last <- function(set)
-    {
-    tail(as.numeric.factor(set), 1)
-    }
-
-sigfig <- function(number, digits=significantDigits)
-    {
-    formatC(signif(number, digits=digits), digits=digits, format="fg", flag="#")
-    }
-
-# outputs
-
-
 # graphs
+
 plot.new <- function()
     {
     dev.new()
-    par(
-        cex=0.6,
-        cex.main=1.8,
+    par(cex=0.6,
+        cex.main=3.0,
         cex.lab=3.0,
-        cex.axis=2.6,
+        cex.axis=2.4,
         lwd=1.2,
-        mar=c(6, 6, 6, 2)
-        )
+        mar=c(6, 6, 6, 2))
     }
 
-plot.offered.actual <- function(xData, yData)
+plot.throughput <- function(xData, yData)
     {
+    title = "system"
+    xLab = "offered throughput (kB/s)"
+    yLab = "actual throughput (kB/s)"
+
     plot.new()
-    plot(xData, yData, type="l", xlab="offered throughput (kB/s)", ylab="actual throughput (kB/s)")
+    plot(xData, yData, type="l", main=title, xlab=xLab, ylab=yLab)
     }
 
-plot.offered.collided <- function(xData, yData)
+plot.packets <- function(xData, yData1, yData2)
     {
+    title = "system"
+    xLab = "offered throughput (kB/s)"
+    yLab = "packets (%)"
+    colors = c("blue", "red")
+    legend = c("collided", "lost")
+
     plot.new()
-    plot(xData, yData, type="l", xlab="offered throughput (kB/s)", ylab="collided packets (%)")
+    plot(xData, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
+    lines(xData, yData2, type="l", col=colors[2])
+    legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
-plot.throughput.collided <- function(xData, yData, node)
+plot.node <- function(xData, yData1, yData2, node)
     {
+    title = ifelse(node != -1, paste0("node ", node), "nodes means")
+    xLab = "throughput (kB/s)"
+    yLab = "packets (%)"
+    colors = c("blue", "red")
+    legend = c("collided", "lost")
+
     plot.new()
-    plot(xData, yData, type="l", xlab=paste0("node ", node, " throughput (kB/s)"), ylab="collided packets (%)")
+    plot(xData, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab)
+    lines(xData, yData2, type="l", col=colors[2])
+    legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
-plot.throughput.lost <- function(xData, yData, node)
+boxplot.throughput <- function(data)
     {
+    title = "system"
+    xLab = "offered throughput (kB/s)"
+    yLab = "actual throughput (kB/s)"
+
     plot.new()
-    plot(xData, yData, type="l", xlab=paste0("node ", node, " throughput (kB/s)"), ylab="lost packets (%)")
+    boxplot(throughput ~ load, data=data, main=title, xlab=xLab, ylab=yLab)
     }
 
-#----------#
-# SETTINGS #
-#----------#
+boxplot.node <- function(data, node)
+    {
+    title = ifelse(node != -1, paste0("node ", node), "nodes means")
+    xLab = "scale"
+    yLab = "packets (%)"
 
-significantDigits = 5 # significant digits kept throughout the computation
+    plot.new()
+    boxplot(collision ~ scale, data=data, main=title, xlab=xLab, ylab=yLab)
+    }
 
 #------#
 # DATA #
@@ -77,10 +85,9 @@ data = read.csv("total.csv")
 
 sets = aggregate(data[2:5], list(scale=data$scale), mean)
 
-#    print(sets)
-
-plot.offered.actual(sets$load, sets$throughput)
-plot.offered.collided(sets$load, sets$collision)
+plot.throughput(sets$load, sets$throughput)
+boxplot.throughput(data)
+# plot.packets(sets$load, sets$collision, sets$lost)
 
 data = read.csv("nodes.csv")
 nodes = split(data, data$node)
@@ -89,12 +96,6 @@ for (node in nodes)
     {
     set = aggregate(node[1:5], list(scale=node$scale), mean)
 
-#        print(set)
-
-    plot.throughput.collided(set$throughput, set$collision, set$node[1])
-    plot.throughput.lost(set$throughput, set$lost, set$node[1])
+    plot.node(set$throughput, set$collision, set$lost, set$node[1])
+    boxplot.node(node, set$node[1])
     }
-
-#-------#
-# NOTES #
-#-------#

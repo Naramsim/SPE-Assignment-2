@@ -23,12 +23,12 @@ plot.new <- function()
 plot.throughput <- function(xData, yData)
     {
     xLab = "offered throughput (%)"
-    yLab = "actual throughput (\211)"
+    yLab = "actual throughput (%)"
 
     plot.new()
-    plot(xData/percent, yData/permille, type="l", xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
-    axis(side=1, at=seq(0, max(xData), 4))
-    axis(side=2)
+    plot(xData/percent, yData/percent, type="l", xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
+    axis(side=1, at=seq(0, 100, 10))
+    axis(side=2, at=seq(0, max(yData), 2))
     }
 
 plot.packets <- function(xData, yData1, yData2)
@@ -48,7 +48,7 @@ plot.packets <- function(xData, yData1, yData2)
 
 plot.node <- function(xData, yData1, yData2, node)
     {
-    title = ifelse(node != -1, paste0("node ", node), "all nodes")
+    title = paste0("node ", node)
     xLab = "throughput (%)"
     yLab = "packets (%)"
     colors = c("blue", "red")
@@ -65,15 +65,15 @@ plot.node <- function(xData, yData1, yData2, node)
 boxplot.throughput <- function(data)
     {
     xLab = "offered throughput (%)"
-    yLab = "actual throughput (\211)"
+    yLab = "actual throughput (%)"
 
-    data$throughput = data$throughput/permille
+    data$throughput = data$throughput/percent
     data$load = data$load/percent
 
     plot.new()
     boxplot(throughput ~ load, data=data, at=sort(unique(data$load)), boxwex=1, xlab=xLab, ylab=yLab, boxwex=1, xaxt="n", yaxt="n")
-    axis(side=1, at=seq(0, max(data$load), 4))
-    axis(side=2)
+    axis(side=1, at=seq(0, 100, 10))
+    axis(side=2, at=seq(0, max(data$throughput), 2))
     }
 
 boxplot.node <- function(data, node)
@@ -92,7 +92,6 @@ boxplot.node <- function(data, node)
 
 speed = 1000000
 percent = speed/100
-permille = speed/1000
 
 #------#
 # DATA #
@@ -102,9 +101,9 @@ data = read.csv("total.csv")
 
 sets = aggregate(data[2:5], list(scale=data$scale), mean)
 
-#plot.throughput(sets$load, sets$throughput)
-#boxplot.throughput(data)
-#plot.packets(sets$load, sets$collision, sets$lost)
+plot.throughput(sets$load, sets$throughput)
+boxplot.throughput(data)
+plot.packets(sets$load, sets$collision, sets$lost)
 
 data = read.csv("nodes.csv")
 nodes = split(data, data$node)
@@ -114,6 +113,6 @@ for (node in nodes)
     set = aggregate(node[1:6], list(scale=node$scale), mean)
 
     plot.node(set$load, set$collision, set$lost, set$node[1])
-    #boxplot.node(node, set$node[1])
+    boxplot.node(node, set$node[1])
     break
     }

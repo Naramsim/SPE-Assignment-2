@@ -61,7 +61,7 @@ class Scheduler:
         throughput_total = 0
         avarage_load = ((settings.UNIFORM_MAX-settings.UNIFORM_MIN)/2) / (settings.GAMMA_SHAPE*settings.GAMMA_SCALE)  # mean of the size of each single packet divided by the mean of the inter arrival time
         for node in nodes:
-            throughput = node.data_sent/Scheduler.time/1000
+            throughput = node.data_sent/Scheduler.time
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
             loss_rate_total += loss_rate
@@ -71,16 +71,16 @@ class Scheduler:
                 collision_rate = 0
             collision_rate_total += collision_rate
 
-            line = [str(node.id), settings.PRECISION.format(throughput), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]
+            line = [str(node.id), settings.PRECISION.format(throughput/1000), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]
             results_data.append(line)
             if settings.FOLDER:
-                file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
+                file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
                 file_nodes.write("\n")
 
-        line = ["MEAN", settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]
+        line = ["MEAN", settings.PRECISION.format(throughput_total/1000/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]
         results_data.append(line)
         if settings.FOLDER:
-            file_nodes.write(",".join(["-1", settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
+            file_nodes.write(",".join(["-1", settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
             file_nodes.write("\n")
             file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
             file_total.write("\n")
@@ -89,7 +89,7 @@ class Scheduler:
             print("\n")
             print(AsciiTable(results_data, results_title).table)
             print("\n")
-            print(" ".join(["SYSTEM THROUGHPUT =", settings.PRECISION.format(throughput_total)]))
+            print(" ".join(["SYSTEM THROUGHPUT (kB/s) =", settings.PRECISION.format(throughput_total/1000)]))
 
         if settings.FOLDER:
             file_nodes.close()

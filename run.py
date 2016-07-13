@@ -16,21 +16,21 @@ def spawn_files():
     file.write("\n")
     file.close()
     file = open("data\\nodes.csv", "w+")
-    file.write(",".join(["node", "scale", "throughput", "collision", "lost"]))
+    file.write(",".join(["node", "scale", "throughput", "load", "collision", "lost"]))
     file.write("\n")
     file.close()
 
-def simulate(exp_min, exp_max):
-    for exp in range(exp_min, exp_max, 1):
-        scale = 2**(exp/10)
-        for seed in range(200):
-        # for seed in range(10):
+def simulate(minVal, maxVal, step):
+    for val in range(minVal, maxVal, step):
+        scale = val/1000
+        for seed in range(100):
+            print("[ STEP ]")
             os.system("python iris\\iris.py -q -s 1000 -f data -r "+str(seed)+" "+str(scale))
+    print("[ DONE ]")
 
 ########
 # MAIN #
 ########
 
 spawn_files()
-simulate(-75, 35)
-# simulate(-5, 5)
+simulate(5, 2000, 8)

@@ -32,6 +32,7 @@ class Node:
         self.packets_sent = 0
         self.packets_received = 0
         self.packets_collided = 0
+        self.last_packet_size = 0
         self.data_sent = 0
         self.has_collided = False
 
@@ -123,11 +124,12 @@ class Node:
 
         for neighbour in self.neighbours:
             self.packets_sent += 1
+            self.last_packet_size = packet.size/len(self.neighbours)
 
             if neighbour.is_idle():
                 neighbour.has_collided = False
                 neighbour.packets_received += 1
-                self.data_sent += packet.size/len(self.neighbours)
+                self.data_sent += self.last_packet_size
             elif neighbour.is_receiving():
                 # logging
                 log.error(" ".join([str(neighbour.id), "was receiving"]))
@@ -143,7 +145,7 @@ class Node:
                 log.error(" ".join([str(self.id), "and", str(neighbour.id), "both sending"]))
                 # logging
                 if not neighbour.has_collided:
-                    neighbour.packets_received -= 1
+                    neighbour.data_sent -= neighbour.last_packet_size/len(neighbour.neighbours)
                     neighbour.packets_collided += 1
                     self.packets_collided += 1
                     neighbour.has_collided = True

@@ -4,6 +4,7 @@
 
 from heapq import heappop as heap_pop
 from heapq import nsmallest as heap_read
+from heapq import nlargest
 
 from terminaltables import AsciiTable
 
@@ -61,7 +62,7 @@ class Scheduler:
         throughput_total = 0
         avarage_load = ((settings.UNIFORM_MAX-settings.UNIFORM_MIN)/2) / (settings.GAMMA_SHAPE*settings.GAMMA_SCALE)  # mean of the size of each single packet divided by the mean of the inter arrival time
         for node in nodes:
-            throughput = node.data_sent/Scheduler.time
+            throughput = node.data_sent/nlargest(1, Scheduler.events)[0].time
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
             loss_rate_total += loss_rate

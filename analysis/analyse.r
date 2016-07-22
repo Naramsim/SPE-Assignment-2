@@ -28,7 +28,7 @@ plot.throughput <- function(xData, yData)
     plot.new()
     plot(xData/percent, yData/percent, type="l", xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
     axis(side=1, at=seq(0, 100, 10))
-    axis(side=2, at=seq(0, max(yData), 2))
+    axis(side=2, at=seq(0, 14, 2))
     }
 
 plot.packets <- function(xData, yData1, yData2)
@@ -41,8 +41,8 @@ plot.packets <- function(xData, yData1, yData2)
     plot.new()
     plot(xData/percent, yData1, ylim=c(0, max(yData1)), type="l", col=colors[1], xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
     lines(xData/percent, yData2, type="l", col=colors[2])
-    axis(side=1, at=seq(0, max(xData), 4))
-    axis(side=2, at=seq(0, max(yData1), 10))
+    axis(side=1, at=seq(0, 100, 10))
+    axis(side=2, at=seq(0, 100, 10))
     legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
@@ -73,7 +73,7 @@ boxplot.throughput <- function(data)
     plot.new()
     boxplot(throughput ~ load, data=data, at=sort(unique(data$load)), boxwex=1, xlab=xLab, ylab=yLab, boxwex=1, xaxt="n", yaxt="n")
     axis(side=1, at=seq(0, 100, 10))
-    axis(side=2, at=seq(0, max(data$throughput), 2))
+    axis(side=2, at=seq(0, 14, 2))
     }
 
 boxplot.node <- function(data, node)

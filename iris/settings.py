@@ -1,25 +1,41 @@
+import re
+import traceback
+
 # distributions
 #
 
+PACKET_SIZE_DISTRIBUTION = ""
+INTERARRIVAL_TIME_DISTRIBUTION = ""
+UNIFORM_MIN = 1
+UNIFORM_MAX = 1
+GAMMA_SHAPE = 1
+GAMMA_SCALE = 1
 SEED = None
-UNIFORM_MIN = 32
-UNIFORM_MAX = 6914
-GAMMA_SHAPE = 1.314
-GAMMA_SCALE = None
 
-# nodes
+POINTS = []
+packet_size_re = "\t(\w+)\(a=(\d+), b=(\d+).*"
+arrival_time_re = "\t(\w+)\(shape=([\d\?\.]+), scale=([\d\?\.]+).*"
+points_re = "Node\d\(0\.(\d+), 0\.(\d+)\);"
+try:
+    for i, line in enumerate(open('../data/affabris.data')):
+        size = re.search(packet_size_re, line)
+        if(size):
+            PACKET_SIZE_DISTRIBUTION = size.group(1)
+            UNIFORM_MIN = int(size.group(2))
+            UNIFORM_MAX = int(size.group(3))
+        time = re.search(arrival_time_re, line)
+        if(time):
+            INTERARRIVAL_TIME_DISTRIBUTION = time.group(1)
+            GAMMA_SHAPE = float(time.group(2)) if time.group(2) != "?" else "None"
+            GAMMA_SCALE = float(time.group(3)) if time.group(3) != "?" else "None"
+        node = re.search(points_re, line)
+        if(node):
+            POINTS.append( (int(node.group(1))/1000, int(node.group(2))/1000 ) )
+except:
+    traceback.print_exc()
+# net
 #
 
-POINTS = [(0.359, 0.799),
-          (0.261, 0.485),
-          (0.642, 0.499),
-          (0.451, 0.666),
-          (0.626, 0.469),
-          (0.473, 0.541),
-          (0.872, 0.529),
-          (0.887, 0.412),
-          (0.788, 0.502),
-          (0.362, 0.702)]
 BOUNDS = 0.25
 BUFFER = 50
 SPEED = 1*1000*1000

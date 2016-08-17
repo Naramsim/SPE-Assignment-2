@@ -57,8 +57,8 @@ plot.node <- function(xData, yData1, yData2, node)
     plot.new()
     plot(xData/percent, yData1, type="l", col=colors[1], main=title, xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
     lines(xData/percent, yData2, type="l", col=colors[2])
-    axis(side=1, at=seq(0, max(xData), 4))
-    axis(side=2, at=seq(0, max(yData1), 10))
+    axis(side=1, at=seq(0, 100, 10))
+    axis(side=2, at=seq(0, 100, 10))
     legend("topleft", legend=legend, lty=c(1, 1), col=colors, bty="n", cex=2.4)
     }
 
@@ -79,11 +79,15 @@ boxplot.throughput <- function(data)
 boxplot.node <- function(data, node)
     {
     title = ifelse(node != -1, paste0("node ", node), "nodes means")
-    xLab = "scale"
+    xLab = "offered throughput (%)"
     yLab = "packets collided (%)"
 
+    data$load = data$load/percent
+
     plot.new()
-    boxplot(collision ~ scale, data=data, at=sort(unique(data$scale)), main=title, xlab=xLab, ylab=yLab)
+    boxplot(collision ~ load, data=data, at=sort(unique(data$load)), main=title, xlab=xLab, ylab=yLab, xaxt="n", yaxt="n")
+    axis(side=1, at=seq(0, 100, 10))
+    axis(side=2, at=seq(0, 100, 10))
     }
 
 #----------#

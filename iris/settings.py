@@ -30,7 +30,7 @@ try:
             GAMMA_SCALE = float(time.group(3)) if time.group(3) != "?" else "None"
         node = re.search(points_re, line)
         if(node):
-            POINTS.append( (int(node.group(1))/1000, int(node.group(2))/1000 ) )
+            POINTS.append((int(node.group(1))/1000, int(node.group(2))/1000))
 except:
     traceback.print_exc()
 # net

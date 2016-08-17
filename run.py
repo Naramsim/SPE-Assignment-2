@@ -33,27 +33,18 @@ def simulate(minVal, maxVal, step):
 # MAIN #
 ########
 
-<<<<<<< HEAD
-spawn_files()
-simulate(30, 72, 3)
-simulate(76, 139, 7)
-simulate(140, 470, 30)
-simulate(500, 1100, 100)
-=======
 try:
-    req_version = (3,0)
+    req_version = (3, 0)
     cur_version = sys.version_info
 
     if cur_version >= req_version:
         spawn_files()
-        simulate(30, 69, 3)
-        simulate(76, 132, 7)
-        simulate(140, 440, 30)
-        simulate(500, 1000, 100)
+        simulate(30, 72, 3)
+        simulate(76, 139, 7)
+        simulate(140, 470, 30)
+        simulate(500, 1100, 100)
     else:
-        print ("Please, use Python 3.x")
+        print("Please, use Python 3.x")
 except Exception as e:
-    print ("Wrong Python version, please use the 3.x")
+    print("Wrong Python version, please use the 3.x")
     raise e
-
->>>>>>> 09c41f1ea7c23a8f2a15136c0c3042e5df2cc279

@@ -20,7 +20,7 @@ packet_size_re = "\t(\w+)\(a=(\d+), b=(\d+).*"
 arrival_time_re = "\t(\w+)\(shape=([\d\?\.]+), scale=([\d\?\.]+).*"
 points_re = "Node\d\(0\.(\d+), 0\.(\d+)\);"
 try:
-    for i, line in enumerate(open('../data/affabris.data')):
+    for i, line in enumerate(open('./data/affabris.data')):
         size = re.search(packet_size_re, line)
         if(size):
             PACKET_SIZE_DISTRIBUTION = size.group(1)

@@ -9,8 +9,8 @@ from heapq import nlargest
 from terminaltables import AsciiTable
 
 import settings
+from settings import NODES
 import log
-from net import nodes
 
 #########
 # CLASS #
@@ -39,7 +39,7 @@ class Scheduler:
         Scheduler.time_previous = Scheduler.time
         Scheduler.time = packet.time
 
-        current_node = nodes[packet.sender]                                                         # this works because the way the list is
+        current_node = NODES[packet.sender]                                                         # this works because the way the list is
         if not packet.is_queued:                                                                    # built introduces a 1:1 relation between
             current_node.generate_next_packet()                                                     # the id and the index;
         if not packet.is_lost:                                                                      # if the packet was lost (i.e. the queue
@@ -61,7 +61,7 @@ class Scheduler:
         collision_rate_total = 0
         throughput_total = 0
         avarage_load = ((settings.UNIFORM_MAX-settings.UNIFORM_MIN)/2) / (settings.GAMMA_SHAPE*settings.GAMMA_SCALE)  # mean of the size of each single packet divided by the mean of the inter arrival time
-        for node in nodes:
+        for node in NODES:
             throughput = node.data_sent/nlargest(1, Scheduler.events)[0].time
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
@@ -78,10 +78,10 @@ class Scheduler:
                 file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
                 file_nodes.write("\n")
 
-        line = ["MEAN", settings.PRECISION.format(throughput_total/1000/len(nodes)), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]
+        line = ["MEAN", settings.PRECISION.format(throughput_total/1000/len(NODES)), settings.PRECISION.format(collision_rate_total/len(NODES)*100), settings.PRECISION.format(loss_rate_total/len(NODES)*100)]
         results_data.append(line)
         if settings.FOLDER:
-            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(nodes)), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(nodes)*100), settings.PRECISION.format(loss_rate_total/len(nodes)*100)]))
+            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(NODES)), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(NODES)*100), settings.PRECISION.format(loss_rate_total/len(NODES)*100)]))
             file_total.write("\n")
 
         if not settings.QUIET:
@@ -113,7 +113,7 @@ class Scheduler:
         status_title = log.format_color(" ".join(["time =", settings.PRECISION, "s(abs)"]).format(Scheduler.time), "green")
         status_data = [["NODE", "STATUS", "QUEUE", "TO", "FOR s(rel)", "UNTIL s(abs)", "LOST", "SENT", "RECEIVED", "COLLIDED"]]
 
-        for node in nodes:
+        for node in NODES:
             if node.is_idle():
                 status = log.format_evidence("IDLE", "green")
                 time_relative = "-"

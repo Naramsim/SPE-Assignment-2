@@ -1,5 +1,8 @@
+from colorclass import Windows
 import re
 import traceback
+
+Windows.enable()
 
 # distributions
 #
@@ -39,6 +42,7 @@ except:
 BOUNDS = 0.25
 BUFFER = 50
 SPEED = 1*1000*1000
+NODES = []
 
 # simulation
 #

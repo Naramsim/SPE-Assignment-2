@@ -6,8 +6,8 @@ import numpy.random as distributions
 
 import arguments
 import settings
-from net import nodes
 from scheduler import Scheduler
+from settings import NODES
 from node import Node
 
 ########
@@ -22,10 +22,10 @@ arguments.save(arguments.parse())
 distributions.seed(settings.SEED)
 
 for point in settings.POINTS:
-    nodes.append(Node(point[0], point[1]))
+    NODES.append(Node(point[0], point[1]))
 
-for node in nodes:
-    node.find_neigbhours(nodes)
+for node in NODES:
+    node.find_neigbhours(NODES)
     node.generate_next_packet()
 
 # simulation

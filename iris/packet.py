@@ -18,7 +18,7 @@ class Packet:
         self.id = Packet.count
         self.sender = sender
         self.time = time
-        self.size = int(distributions.uniform(settings.UNIFORM_MIN, settings.UNIFORM_MAX+1))
+        self.size = self.set_size(int(distributions.binomial(settings.BINOMIAL_N, settings.BINOMIAL_P)))
         self.transfer_time = self.size/settings.SPEED
         self.is_queued = False
         self.is_lost = False
@@ -29,8 +29,10 @@ class Packet:
         if self.time != other.time:
             return self.time < other.time
         else:
-            return self.id < other.id                                                               # if the time is the same, discriminate
-                                                                                                    # using the incremental nature of the id
+            # if the time is the same, discriminate
+            # using the incremental nature of the id
+            return self.id < other.id
+            
     def __str__(self):
         lines = ["",
                  log.format_color("- PACKET {} -".format(self.id), "cyan"),
@@ -40,3 +42,10 @@ class Packet:
                  "size          = {} byte".format(self.size),
                  "status        = {}".format("QUEUED" if self.is_queued else "PENDING")]
         return "\n".join(lines)
+
+    def set_size(self, size):
+        if size < settings.PACKET_SIZE_MIN:
+            size = settings.PACKET_SIZE_MIN
+        elif size > settings.PACKET_SIZE_MAX:
+            size = settings.PACKET_SIZE_MAX
+        return size

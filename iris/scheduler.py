@@ -39,11 +39,13 @@ class Scheduler:
         Scheduler.time_previous = Scheduler.time
         Scheduler.time = packet.time
 
-        current_node = NODES[packet.sender]                                                         # this works because the way the list is
-        if not packet.is_queued:                                                                    # built introduces a 1:1 relation between
-            current_node.generate_next_packet()                                                     # the id and the index;
-        if not packet.is_lost:                                                                      # if the packet was lost (i.e. the queue
-            current_node.handle_packet(packet)                                                      # was full), take no action
+        # this works because the way the list is built introduces a 1:1 relation between the id and the index
+        # if the packet was lost (i.e. the queue was full), take no action
+        current_node = NODES[packet.sender]
+        if not packet.is_queued:                                                                    
+            current_node.generate_next_packet()                                                     
+        if not packet.is_lost:                                                                      
+            current_node.handle_packet(packet)                                                      
 
         # logging
         log.plain(Scheduler())
@@ -51,18 +53,20 @@ class Scheduler:
 
     def handle_results():
         if settings.FOLDER:
-            file_total = open(settings.FOLDER+"\\total.csv", "a")
-            file_nodes = open(settings.FOLDER+"\\nodes.csv", "a")
+            file_total = open(settings.FOLDER+"/total.csv", "a")
+            file_nodes = open(settings.FOLDER+"/nodes.csv", "a")
 
         results_title = log.format_color("results", "green")
-        results_data = [["NODE", "THROUGHPUT (kB/s)", "COLLISION RATE (%)", "LOSS RATE (%)"]]
+        results_data = [["NODE", "THROUGHPUT (kB/s)", "COLLISION RATE (%)", "LOSS RATE (%)", "generated"]]
 
         loss_rate_total = 0
         collision_rate_total = 0
         throughput_total = 0
-        avarage_load = ((settings.UNIFORM_MAX-settings.UNIFORM_MIN)/2) / (settings.GAMMA_SHAPE*settings.GAMMA_SCALE)  # mean of the size of each single packet divided by the mean of the inter arrival time
+        # exponential scale is the mean of an exponential distribution https://www.johndcook.com/blog/2010/02/03/statistical-distributions-in-scipy/
+        # mean of the size of each single packet divided by the mean of the inter arrival time
+        average_load = (settings.BINOMIAL_P*settings.BINOMIAL_N) / settings.EXPONENTIAL_SCALE  
         for node in NODES:
-            throughput = node.data_sent/nlargest(1, Scheduler.events)[0].time
+            throughput = node.data_sent/nlargest(1, Scheduler.events)[0].time # data_sent/last absolute time # mean of data sent per second
             throughput_total += throughput
             loss_rate = node.packets_lost/node.packets_generated
             loss_rate_total += loss_rate
@@ -72,23 +76,29 @@ class Scheduler:
                 collision_rate = 0
             collision_rate_total += collision_rate
 
-            line = [str(node.id), settings.PRECISION.format(throughput/1000), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]
+            line = [str(node.id), settings.PRECISION.format(throughput/1000), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100), settings.PRECISION.format(node.packets_generated)]
             results_data.append(line)
             if settings.FOLDER:
-                file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
+                file_nodes.write(",".join([str(node.id), settings.PRECISION.format(settings.EXPONENTIAL_SCALE), settings.PRECISION.format(throughput), settings.PRECISION.format(average_load), settings.PRECISION.format(collision_rate*100), settings.PRECISION.format(loss_rate*100)]))
                 file_nodes.write("\n")
 
         line = ["MEAN", settings.PRECISION.format(throughput_total/1000/len(NODES)), settings.PRECISION.format(collision_rate_total/len(NODES)*100), settings.PRECISION.format(loss_rate_total/len(NODES)*100)]
         results_data.append(line)
         if settings.FOLDER:
-            file_total.write(",".join([settings.PRECISION.format(settings.GAMMA_SCALE), settings.PRECISION.format(throughput_total/len(NODES)), settings.PRECISION.format(avarage_load), settings.PRECISION.format(collision_rate_total/len(NODES)*100), settings.PRECISION.format(loss_rate_total/len(NODES)*100)]))
+            file_total.write(",".join([settings.PRECISION.format(settings.EXPONENTIAL_SCALE), settings.PRECISION.format(throughput_total/len(NODES)), settings.PRECISION.format(average_load), settings.PRECISION.format(collision_rate_total/len(NODES)*100), settings.PRECISION.format(loss_rate_total/len(NODES)*100)]))
             file_total.write("\n")
 
         if not settings.QUIET:
             print("\n")
             print(AsciiTable(results_data, results_title).table)
             print("\n")
+            print(" ".join(["SCALE =", settings.PRECISION.format(settings.EXPONENTIAL_SCALE)]))
+            print(" ".join(["RATE =", settings.PRECISION.format(settings.EXPONENTIAL_RATE)]))
             print(" ".join(["SYSTEM THROUGHPUT (kB/s) =", settings.PRECISION.format(throughput_total/1000)]))
+            print(" ".join(["AVG OFFERED LOAD (%) =", settings.PRECISION.format(average_load)]))
+            print(" ".join(["Packet Size mean =", settings.PRECISION.format((settings.BINOMIAL_P*settings.BINOMIAL_N))]))
+            print(" ".join(["I-A Time mean =", settings.PRECISION.format(settings.EXPONENTIAL_SCALE)]))
+            print(" ".join(["Actual Throughput saved =", settings.PRECISION.format(throughput_total/len(NODES))]))
 
         if settings.FOLDER:
             file_nodes.close()

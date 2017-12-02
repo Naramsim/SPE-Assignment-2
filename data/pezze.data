@@ -1,0 +1,16 @@
+Packet size (in bytes) distribution:
+	Binomial(p=0.806, n=1124)Support: [32, 1156](to be rounded to the nearest integer)
+Inter arrival time distribution:
+	Exponential(rate=?)
+Node buffer size: 40
+Node postitions:
+Node0(0.305, 0.304);
+Node1(0.019, 0.474);
+Node2(0.361, 0.483);
+Node3(0.093, 0.482);
+Node4(0.561, 0.457);
+Node5(0.426, 0.724);
+Node6(0.751, 0.329);
+Node7(0.721, 0.136);
+Node8(0.262, 0.337);
+Node9(0.868, 0.085);

@@ -1,5 +1,6 @@
 __pycache__
-iris/__pycache__
 .virtual_env
-analysis/*.pdf
-*.csv
+.local
+.rstudio
+.vscode
+Rplots*.pdf

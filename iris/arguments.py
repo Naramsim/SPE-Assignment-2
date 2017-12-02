@@ -20,7 +20,8 @@ def parse():
     group_limits = parser.add_mutually_exclusive_group(required=True)
     group_limits.add_argument("-t", "--time", type=_positive_float, help="run the simulation until time T", metavar="T")
     group_limits.add_argument("-s", "--steps", type=_positive_int, help="run the simulation for S amount of steps", metavar="S")
-    parser.add_argument("scale", type=_positive_float, help="the scale of the gamma distribution controlling the inter-arrival time")
+    parser.add_argument("scale", type=_positive_float, help="the scale of the exponential distribution controlling the inter-arrival time (scale = 1/rate)")
+    #parser.add_argument("rate", type=_positive_float, help="the rate of the exponential distribution controlling the inter-arrival time (rate = 1/scale)")
     return parser.parse_args()
 
 def save(args):
@@ -28,7 +29,12 @@ def save(args):
     settings.QUIET = args.quiet
     settings.FOLDER = args.folder
     settings.SEED = args.seed
-    settings.GAMMA_SCALE = args.scale
+    if args.scale:
+        settings.EXPONENTIAL_SCALE = args.scale
+        settings.EXPONENTIAL_RATE = 1/args.scale
+    # if args.rate:
+    #     settings.EXPONENTIAL_RATE = args.rate
+    #     settings.EXPONENTIAL_SCALE = 1/args.rate
     settings.TIME = args.time
     settings.STEPS = args.steps
 

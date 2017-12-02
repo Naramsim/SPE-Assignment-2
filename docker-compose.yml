@@ -1,0 +1,20 @@
+version: "2"
+
+services:
+  studio:
+    image: rocker/rstudio
+    ports: 
+      - "8787:8787"
+    volumes:
+      - "./:/home/rstudio"
+    container_name: studio
+    working_dir: /home/rstudio
+  ubuntu:
+    image: python
+    volumes:
+      - "./:/home"
+      - "/home/__pycache__"
+      - "/home/.virtual_env"
+    command: "tail -f /dev/null"
+    container_name: ubuntu
+    working_dir: /home

@@ -3,7 +3,7 @@
 ### Installing
 
 ```sh
-git clone ...
+git clone https://github.com/Naramsim/SPE-Assignment-2.git
 ```
 
 ### Run

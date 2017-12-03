@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-A simulator of a simple wireless network is derived from known given parameters, enough data is then gathered in order to perform an in-depth analysis of its behaviour. Moreover, the sketch of a mathematical model of the wireless system is provided, along with its solution and a comparison with the coded simulator.
+A simulator of a simple wireless network is derived from known given parameters, enough data is then gathered in order to perform an in-depth analysis of its behavior. Moreover, the sketch of a mathematical model of the wireless system is provided, along with its solution and a comparison with the coded simulator.
 \end{abstract}
 
 \section{Introduction}\label{sec:introduction}
@@ -51,7 +51,7 @@ A simple 10 nodes wireless network is simulated given \href{http://www.sharelate
 \item The network rules are similar to the trivial continuous Pure ALOHA ones, and can be found in the Assignment paper.
 \end{itemize}
 
-\begin{figure}[t]
+\begin{figure}[h]
     \centering
     \includegraphics[width=\columnwidth]{graphs/NodesPositions}
     \caption{Node positions}
@@ -70,8 +70,27 @@ A simple network simulator has been designed, with three actors taking the main 
     \label{fig:flowchart}
 \end{figure*}
 
+\begin{table}
+    \centering
+    \caption{Main Python modules}
+    \label{tab:mainpythonmodules}
+    \begin{tabular}{l|l}
+        \toprule
+        module & description \\
+        \midrule
+        \(arguments.py\) & defines command line arguments \\
+        \(iris.py\) & start a single simulation \\
+        \(log.py\) & defines logging functions \\
+        \(node.py\) & defines the node entity \\
+        \(packet.py\) & defines the packet entity \\
+        \(scheduler.py\) & defines the scheduler entity \\
+        \(settings.py\) & contains general settings \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \subsection{Implementation}\label{sec:implementation}
-To implement the simulator Python 3 was used, in order to take advantage of its OOP capabilities. The code was thus split between the actors of the simulator by defining the Scheduler, Node, and Packet classes. Among them, other helper classes have been defined in order to read the initially given settings, to read the command line arguments, to efficiently log the simulator state, and to start the simulator. A brief description of those classes can be found in mattiatable3. The source code for these classes is attached and can be easily accessed: it will thus not be explained in detail. It is particularly important to denote how the two distributions, packet size and inter-arrival time, were designed in Python: the third-party library “Numpy” was used, since it provided the methods to generate samples from both Binomial and Exponential distributions. The samples from the Binomial distributions were truncated in order to not exceed the maximum and minimum packet size \([32, 1156]\); to generate Exponential samples Numpy required the use of a Scale parameter \(\beta\) instead of the common Rate \(\lambda\) parameter, with \(\beta=1/\lambda\). In order to run the simulations enough times to gather all the necessary data, a Python script was coded to start sequential simulations with different parameters, like the parameter which rules the inter-arrival time distribution, or the seed which governs the random aspects of the simulation (i.e. the distributions). The simulation is ran with 100 different seeds for each of the scale parameters found in \cref{tab:scalevalues}. A Makefile is provided in order to run the entire simulation (\(make run\)) and to install a Python virtual environment with all the necessary dependencies (numpy among the others).
+To implement the simulator Python 3 was used, in order to take advantage of its OOP capabilities. The code was thus split between the actors of the simulator by defining the Scheduler, Node, and Packet classes. Among them, other helper classes have been defined in order to read the initially given settings, to read the command line arguments, to efficiently log the simulator state, and to start the simulator. A brief description of those classes can be found in \cref{tab:mainpythonmodules}. The source code for these classes is attached and can be easily accessed: it will thus not be explained in detail. It is particularly important to denote how the two distributions, packet size and inter-arrival time, were designed in Python: the third-party library “Numpy” was used, since it provided the methods to generate samples from both Binomial and Exponential distributions. The samples from the Binomial distributions were truncated in order to not exceed the maximum and minimum packet size \([32, 1156]\); to generate Exponential samples Numpy required the use of a Scale parameter \(\beta\) instead of the common Rate \(\lambda\) parameter, with \(\beta=1/\lambda\). In order to run the simulations enough times to gather all the necessary data, a Python script was coded to start sequential simulations with different parameters, like the parameter which rules the inter-arrival time distribution, or the seed which governs the random aspects of the simulation (i.e. the distributions). The simulation is ran with 100 different seeds for each of the scale parameters found in \cref{tab:scalevalues}. A Makefile is provided in order to run the entire simulation (\texttt{make run}) and to install a Python virtual environment with all the necessary dependencies (numpy among the others).
 
 \begin{table}
     \centering
@@ -88,16 +107,17 @@ To implement the simulator Python 3 was used, in order to take advantage of its 
         \num{0.02} & \num{0.1} & \num{0.008} \\
         \bottomrule
     \end{tabular}
-    \caption{The scale parameter is used in the simulator instead of the rate \(\lambda=1/\beta\), because the utilized mathematical module \href{https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.random.exponential.html}{uses the scale parameter}.}
+    
+    The scale parameter is used in the simulator instead of the rate \(\lambda=1/\beta\), because the utilized mathematical module \href{https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.random.exponential.html}{uses the scale parameter}.
 \end{table}
 
 \subsection{Execution}\label{sec:execution}
-In order to execute the simulation a Linux machine with an distribution of Python 3.x installed is required. If such environment is not present, a \(docker-compose.yml\) file is provided to instantiate a proper Python 3 container. Moreover, provided the simulation is ran locally, the local installation of Python will not be polluted with the project dependencies, thanks to the creation of a Python virtual environment. In order to download all the dependencies the command make has to be ran in a first time. Then with the command make run a set of sequential simulations is started with different seeds and scale parameters.
+In order to execute the simulation a Linux machine with an distribution of Python 3.x installed is required. If such environment is not present, a \texttt{docker-compose.yml} file is provided to instantiate a proper Python 3 container. Moreover, provided the simulation is ran locally, the local installation of Python will not be polluted with the project dependencies, thanks to the creation of a Python virtual environment. In order to download all the dependencies the command \texttt{make} has to be ran in a first time. Then with the command \texttt{make run} a set of sequential simulations is started with different seeds and scale parameters.
 
 \section{Evaluation}\label{sec:evaluation}
 
 \subsection{Aggregation}\label{sec:aggragation}
-The Python simulator described above stores its results in two \(CSV\) files, one for the single nodes and one for the total system seen as a single entity. The \(CSV\) files store the data as in mattiatable4, with the \(CSV\) file for the entire system lacking the node identifier. In order to analyze the data an R script was used: the data is loaded into an R data frame, and aggregated using the scale of the Exponential distribution as a point of aggregation, since it is the only free parameter of the system; a mean is then calculated over the aggregated elements . The rate parameter was derived from the scale parameter using \cref{eq:scaletorate} to better reflect the provided settings file. 
+The Python simulator described above stores its results in two \(CSV\) files, one for the single nodes and one for the total system seen as a single entity. The \(CSV\) files store the data as in \cref{tab:csvformat}, with the \(CSV\) file for the entire system lacking the node identifier. In order to analyze the data an R script was used: the data is loaded into an R data frame, and aggregated using the scale of the Exponential distribution as a point of aggregation, since it is the only free parameter of the system; a mean is then calculated over the aggregated elements . The rate parameter was derived from the scale parameter using \cref{eq:scaletorate} to better reflect the provided settings file. 
 
 \begin{equation}
     \lambda=1/\beta\label{eq:scaletorate}
@@ -107,7 +127,7 @@ The Python simulator described above stores its results in two \(CSV\) files, on
     \centering
     \caption{\(CSV\) format}
     \label{tab:csvformat}
-    \begin{tabular}{c|c}
+    \begin{tabular}{l|l}
         \toprule
         value & description \\
         \midrule
@@ -119,7 +139,6 @@ The Python simulator described above stores its results in two \(CSV\) files, on
         \(lost\) & percentage of packets lost due to full queues \\
         \bottomrule
     \end{tabular}
-    \caption{The scale parameter is used in the simulator instead of the rate \(\lambda=1/\beta\), because the utilized mathematical module \href{https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.random.exponential.html}{uses the scale parameter}.}
 \end{table}
 
 \begin{figure}[t]
@@ -169,7 +188,7 @@ The Python simulator described above stores its results in two \(CSV\) files, on
 \end{figure}
 
 \subsection{Data analysis}\label{sec:dataanalysis}
-\cref{grph:sim1} shows the direct correlation between the tunable rate parameter and the offered throughput of the network. The network works at its full potential when the rate parameter is around \(1000\); on the opposite, if the rate parameter is below \(10\) the network nodes are basically always idle (giving no interest in studying the net in that particular condition). To understand when the network performs better, the actual throughput, which does not take in consideration collided and lost packets, was calculated against the offered throughput, showing in \cref{grph:sim24} that when the network performs at \(25\%\) of its potential the successfully transmitted traffic is \(15\%\). On the other hand, while the network starts being saturated the actual percentage of successfully transmitted traffic drops to around \(6\%\). \cref{grph:sim3} shows the actual throughput relative to the actually-sent throughput, showing that when the network performs at low-levels of offered throughput the traffic is mainly successful with few collisions while when the net is under heavy load the traffic tends to be only composed by collided packets. mattiafigure5 shows the percentage of collided and lost packets varying the load of the network, showing that when the successful traffic is maximized the number of lost packets is around \(50\%\). \cref{grph:sim56} strengthen the above presented results showing the network performance in terms of collided packets over the traffic. The maximum successful traffic achievable by the network is at \(15\%\) of full potential while in order to have a network which loses only a few packets the load must be considerably lowered. To have different perspectives on how the internal network works two single nodes were studied, respectively one with the most number of neighbors and one with the least. Respectively Node \(2\) is the node with most neighbors (4) and from \cref{grph:node2} is clearly visible that the curve of packets lost over the offered throughput rise up quicker with respect to the system one shown in \cref{grph:sim56}, denoting that high clustered areas perform worse than the average system. On the other hand, low-density areas perform better as shown in \cref{grph:node1} which takes in consideration node \(1\) which has only 1 neighbor, that can send outgoing successful traffic with a higher rate with respect to the average of the system.
+\cref{grph:sim1} shows the direct correlation between the tunable rate parameter and the offered throughput of the network. The network works at its full potential when the rate parameter is around \(1000\); on the opposite, if the rate parameter is below \(10\) the network nodes are basically always idle (giving no interest in studying the net in that particular condition). To understand when the network performs better, the actual throughput, which does not take in consideration collided and lost packets, was calculated against the offered throughput, showing in \cref{grph:sim24} that when the network performs at \(30\%\) of its potential the successfully transmitted traffic is \(15\%\). On the other hand, while the network starts being saturated the actual percentage of successfully transmitted traffic drops to around \(6\%\). \cref{grph:sim3} shows the actual throughput relative to the actually-sent throughput, showing that when the network performs at low-levels of offered throughput the traffic is mainly successful with few collisions while when the net is under heavy load the traffic tends to be only composed by collided packets. \cref{grph:sim56} shows the percentage of collided and lost packets varying the load of the network, showing that when the traffic is maximized the number of collided packets is around \(85\%\). Looking again at \cref{grph:sim24} the maximum successful traffic achievable by the network is at \(30\%\) of full potential when a little less than \(50\%\) of the sent packets are collided and thus not usable anymore. To have different perspectives on how the internal network works two single nodes were studied, respectively the one with the most number of neighbors and the one with the least. Respectively Node \(2\) is the node with most neighbors (4) and from \cref{grph:node2} is clearly visible that the curve of packets collided over the offered throughput rise up quicker with respect to the system one shown in \cref{grph:sim56}, denoting that high clustered areas perform worse than the average system. On the other hand, low-density areas perform better as shown in \cref{grph:node1} which takes in consideration node \(1\) which has only 1 neighbor, that can send outgoing successful traffic with a higher rate with respect to the average of the system.
 
 \section{Analytical model}\label{sec:analiticalmodel}
 
@@ -184,7 +203,7 @@ A simplistic analytical model was devised from the given hard constraints in ord
 \end{figure}
 
 \subsection{Model}\label{sec:model}
-A Continous Time Markov Chain was used to devise the model, in particular, it was used the infinitesimal generator represented in \cref{eq:infinitesimalgenerator} where \(q_ij\) are the rate of transitions from the state \(i\) to state \(j\) and state \(q_i\) is given by the \cref{eq:qi}.
+A Continuous Time Markov Chain was used to devise the model, in particular, it was used the infinitesimal generator represented in \cref{eq:infinitesimalgenerator} where \(q_ij\) are the rate of transitions from the state \(i\) to state \(j\) and state \(q_i\) is given by the \cref{eq:qi}.
 
 \begin{equation}
     Q=[q_{i,j}]=\begin{Bmatrix} q_{0} & q_{0,1} & \cdots \\ q_{1,0} & q_{1} & \cdots \\ \vdots & \vdots & \ddots \end{Bmatrix}\label{eq:infinitesimalgenerator}
@@ -203,7 +222,7 @@ It must be stated that state transitions could occur at any time, and the time b
 Transitions across the Markov Chain are divided into two types: one associated with the end of a transmission and it is equal to the number of transmitting nodes multiplied by the rate mu, set to 1, the other type of transition is the generation by an idle node of a packet and it is equal to $ (10 - Nt - Nw)*\lambda $ which is equal to the idle nodes multiplied by the inter-arrival rate $ \lambda $, which is a free parameter and is variated between \(0.001\) and  \(0.1\) (in the simulator it was used the scale parameter which is just the inverse of the rate parameter).
 
 \subsection{Implementation}\label{sec:implementationmodel}
-The model was implemented in Python 3 language using the mathematical module Numpy for working with matrices. A matrix composed of the ten states is initially computed, then for each different rate parameter lambda (ranging from \(0.001\) to \(0.1\)) a transition matrix is derived and from it, the steady state matrix is computed and saved in a useful format for the later analysis. The file generated by the Python script is then imported into the R script used to analyze the simulator in order to have both the data coming from the simulator and from the model.
+The model was implemented in Python 3 language using the mathematical module Numpy for working with matrices. A matrix composed by the states represented in \cref{fig:mcts} is initially computed, then for each different rate parameter lambda (ranging from \(0.001\) to \(0.1\)) a transition matrix (in the same format as \cref{eq:infinitesimalgenerator}) is derived and from it, the steady state matrix is computed and saved in a useful \(CSV\) format for the later analysis. The file generated by the Python script is then imported into the R script used to analyze the simulator in order to have both the data coming from the simulator and from the model.
 
 \begin{figure}[t]
     \centering
@@ -228,9 +247,9 @@ It is natural to compare the model designed with the Pure ALOHA protocol. Pure A
 \item If you have data to send, send the data.
 \item If, while you are transmitting data, you receive any data from another station, there has been a message collision. All transmitting stations will need to try resending "later".
 \end{itemize}
-It is clearly visible that Pure ALOHA and the model discussed are similar but some profound difference are present. Pure ALOHA protocol lacks any carrier sensing technique and thus if a packet has to be sent it will be sent even if the network channel is busy while the discussed model will transmit packets only when the network is free. The discussed model, moreover, will transmit any packet (just generated, waiting or in the queue) as soon as the network will become free without any backoff strategy, strategy which is instead present in the Pure ALOHA protocol although with no specific implementation. In the end, these two models appear behaving similarly.
+It is clearly visible that Pure ALOHA and the model discussed are similar but some profound difference are present. Pure ALOHA protocol lacks any carrier sensing technique and thus if a packet has to be sent it will be sent even if the network channel is busy while the discussed model will transmit packets only when the network is free. The discussed model, moreover, will transmit any packet (just generated, waiting or in the queue) as soon as the network will become free without any back-off strategy, strategy which is instead present in the Pure ALOHA protocol although with no specific implementation. In the end, these two models appear behaving similarly.
 
 \section{Conclusion}\label{sec:conclusion}
-Two approaches to evaluating a possible-real network system were presented. The first one simulated the network programmatically with one free parameter which was the inter-arrival time of packets which ruled the load of the network. Knowing how the network performs with different kinds of traffic is indeed essential for the latter decision of where, when and for how much time to use this type of network. The second approach to study the network was done analytically by devising a simplified model of the real network and then solving it finding similar conclusions with respect to the simulator in a much faster way. Both the two approaches permitted to analyze a possible real-network without using any real data (maybe taken by real control station) but instead creating a completely separate, but similar, system to be analyzed. In this way, there is no need to create a real test network to simulate the system and any change/improvement to the simulated/modeled system can be easily done.
+Two approaches to evaluating a possible-real network system were presented. The first one simulated the network programmatically with one free parameter which was the inter-arrival time of packets which ruled the load of the network. Knowing how the network performs with different kinds of traffic is indeed essential for the latter decision of where, when and for how much time to use this type of network. The second approach to study the network was done analytically by devising a simplified model of the real network and then solving it finding similar conclusions with respect to the simulator in a much faster way. Both the two approaches permitted to analyze a possible real-network without using any real data (maybe taken by real control station) but instead creating a completely separate, but similar, system to be analyzed. In this way, there is no need to create a real test network to simulate the system and any change/improvement to the simulated/modeled system can be easily done. Is is also clear that a deep difference is present between the simulator and the model since the first one is considered more tunable and probably gives more accurate results with respect to the analytical model, which on the other hand is far easier to implement and considerably faster in the computation. It is possible to conclude by saying that the use-cases of two above presented systems are different: when the network to simulate has many tunable parameters is it preferred to use a simulator which in result will give accurate results, while when the network to simulate is big  and slow to simulate it is better to devise a model in a first stage to quickly have a glance about how the network performs.
 
 \end{document}

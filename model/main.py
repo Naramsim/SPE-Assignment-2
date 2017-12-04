@@ -137,7 +137,7 @@ if __name__ == "__main__":
         if lambda_value == 0:
             lambda_value = 1
         l = lambda_value / 1000 # 100000
-        print('[ STEP ] {}'.format(l))
+        
         # create the infinitesimal generator associated with the MC
         transition_matrix = generate_matrix(states, l)
         Q = np.ones((N, N + 1))
@@ -147,19 +147,13 @@ if __name__ == "__main__":
         b.append(1)
         # compute the steady state of the MC
         # use lstsq numpy function to solve ax=b, where a is Q transposed, b is a probability vector like [0,0,...,0,1], x is the returned solution
-        # solving the equation ??? in the report
+        # solving the equation 4 in the report
         # https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.linalg.lstsq.html
         steady_state_matrix = np.linalg.lstsq(Q.transpose(), b)
 
-        steady_state_matrix2 = np.dot(replace_last_column_with_1(np.zeros((N, N))), np.linalg.inv(replace_last_column_with_1(transition_matrix - np.identity(N))))
-        #print(steady_state_matrix2)
+        PIQ = np.dot(steady_state_matrix[0], transition_matrix) # Should be close to zero to prove our result
+        error_matrix = np.isclose(a=PIQ, b=np.zeros((N, N)))
+        print('[ STEP ] {}, {}'.format(l, np.all(error_matrix)))
 
-        #print(np.dot(steady_state_matrix2, (transition_matrix - np.identity(N))))
-        #print(np.dot(steady_state_matrix[0], transition_matrix))
-        #print(np.isclose(a=np.dot(steady_state_matrix2, (transition_matrix - np.identity(N))), b=np.zeros((N, N))))
-        #print('----')
-
-        #print(steady_state_matrix)
         append_results(lambda_value, steady_state_matrix[0])
-        
-        
+    print('Now it is possible to analyze the model in R, just set to TRUE the model part')
